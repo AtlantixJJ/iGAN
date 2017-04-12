@@ -22,13 +22,16 @@ class HOGNet():
         print('COMPILING')
         t = time()
         m = T.tensor4()
+        # (1, 1, 16, 16)
         bf_w = np.ones((1, 1, 2 * BS, 2 * BS))
+        # parameter
         bf = sharedX(floatX(bf_w))
         m_b = dnn_conv(m, bf, subsample=(BS, BS), border_mode=(BS / 2, BS / 2))
         _comp_mask = theano.function(inputs=[m], outputs=m_b)
         print('%.2f seconds to compile [compMask] functions' % (time() - t))
         return _comp_mask
 
+    
     def comp_mask(self, masks):
         masks = np.asarray(self._comp_mask(masks))
         masks = masks > 1e-5

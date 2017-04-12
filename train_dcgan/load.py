@@ -4,7 +4,6 @@ from fuel.schemes import ShuffledScheme, SequentialScheme
 from fuel.streams import DataStream
 from time import time
 
-
 def load_imgs(ntrain=None, ntest=None, batch_size=128, data_file=None):
     t = time()
     print('LOADING DATASET...')
@@ -21,6 +20,7 @@ def load_imgs(ntrain=None, ntest=None, batch_size=128, data_file=None):
         ntest = te_data.num_examples
     else:
         ntest = min(ntest, te_data.num_examples)
+
     print('name = %s, ntrain = %d, ntest = %d' % (data_file, ntrain, ntest))
 
     tr_scheme = ShuffledScheme(examples=ntrain, batch_size=batch_size)

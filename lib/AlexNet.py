@@ -137,7 +137,8 @@ def load_model(net, layer='fc8'):
 
 
 def transform_im(x, npx=64, nc=3):
-    if nc == 3:
+    if nc == 3: # default option
+        # (-1,1) => (0,255)
         x1 = (x + sharedX(1.0)) * sharedX(127.5)
     else:
         x1 = T.tile(x, [1,1,1,3]) * sharedX(255.0)  #[hack] to-be-tested

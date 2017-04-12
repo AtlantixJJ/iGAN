@@ -1,3 +1,4 @@
+#coding:utf-8
 import theano
 import theano.tensor as T
 from time import time
@@ -13,9 +14,11 @@ class OPT_Solver():
         self.nc = model.nc
         self.nz = model.nz
         self.model_name = model.model_name
+
         self.transform = model.transform
         self.transform_mask = model.transform_mask
         self.inverse_transform = model.inverse_transform
+
         BS = 4 if self.nc == 1 else 8 # [hack]
         self.hog = HOGNet.HOGNet(use_bin=True, NO=8, BS=BS, nc=self.nc)
         self.opt_model = self.def_invert(model, batch_size=batch_size, d_weight=d_weight, nc=self.nc)
@@ -24,6 +27,7 @@ class OPT_Solver():
     def get_image_size(self):
         return self.npx
 
+    # 优化一次z
     def invert(self, constraints, z_i):
         [_invert, z_updates, z, beta_r, z_const] = self.opt_model
         constraints_t  = self.preprocess_constraints(constraints)
@@ -83,16 +87,24 @@ class OPT_Solver():
             gx3 = 1.0-gx #T.tile(gx, (1, 3, 1, 1))
         else:
             gx3 = gx
+        # tile : 沿着对应axis重复给定次数
         mm_c = T.tile(m_c, (1, gx3.shape[1], 1, 1))
+        # 生成图像与给定颜色之间的MSE
         color_all = T.mean(T.sqr(gx3 - x_c) * mm_c, axis=(1, 2, 3)) / (T.mean(m_c, axis=(1, 2, 3)) + sharedX(1e-5))
+        
+        # 生成图像的HOG特征
         gx_edge = self.hog.get_hog(gx3)
+        # 给定图像的边缘信息
         x_edge = self.hog.get_hog(x_e)
         mm_e = T.tile(m_e, (1, gx_edge.shape[1], 1, 1))
         sum_e = T.sum(T.abs_(mm_e))
         sum_x_edge = T.sum(T.abs_(x_edge))
+        # 给定图像边缘信息与生成图像边缘信息的MSE
         edge_all = T.mean(T.sqr(x_edge - gx_edge) * mm_e, axis=(1, 2, 3)) / (T.mean(m_e, axis=(1, 2, 3)) + sharedX(1e-5))
+        
         rec_all = color_all + edge_all * sharedX(0.2)
         z_const = sharedX(5.0)
+        # 初始z与z参数的误差 # z0 只是初始值
         init_all = T.mean(T.sqr(z0 - z)) * z_const
 
         if d_weight > 0:
@@ -100,18 +112,20 @@ class OPT_Solver():
             p_gen = model.model_D(gx)
             real_all = T.nnet.binary_crossentropy(p_gen, T.ones(p_gen.shape)).T
             cost_all = rec_all + d_weight_r * real_all[0] + init_all
-        else:
+        else: # default
             print('without D')
             cost_all = rec_all + init_all
             real_all = T.zeros(cost_all.shape)
 
         cost = T.sum(cost_all)
         d_updater = updates.Adam(lr=sharedX(lr), b1=sharedX(b1))
+        # 生成图像，整体误差（求和），整体误差，绘图误差，判别误差，初始误差，..., ...
         output = [gx, cost, cost_all, rec_all, real_all, init_all, sum_e, sum_x_edge]
 
         print('COMPILING...')
         t = time()
 
+        # 用Adam优化 "z"
         z_updates = d_updater([z], cost)
         _invert = theano.function(inputs=[x_c, m_c, x_e, m_e, z0], outputs=output, updates=z_updates)
         print('%.2f seconds to compile _invert function' % (time() - t))

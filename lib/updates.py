@@ -1,3 +1,9 @@
+#coding:utf-8
+"""
+各种优化方法的本质都是导数的函数
+将其中一些参数一起管理成一个类
+调用时形成表达式
+"""
 import theano
 import theano.tensor as T
 
@@ -163,6 +169,7 @@ class Adam(Update):
 
     def __call__(self, params, cost):
         updates = []
+        # take gradient of cost w.r.t a list of parameters
         grads = T.grad(cost, params)
         grads = clip_norms(grads, self.clipnorm)
         t = theano.shared(floatX(1.))

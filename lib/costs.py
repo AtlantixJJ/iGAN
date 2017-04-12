@@ -1,3 +1,7 @@
+#coding:utf-8
+"""
+cost可以看作是一个函数，可以用基本运算定义出表达式，theano也带有一些已经写好的cost
+"""
 import theano
 import theano.tensor as T
 

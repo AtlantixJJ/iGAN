@@ -1,3 +1,5 @@
+#coding: utf-8
+
 from __future__ import print_function
 
 import theano
@@ -16,6 +18,7 @@ from PIL import Image
 from pydoc import locate
 from lib import activations
 
+# 截止在AlexNet的某一层输出
 def def_feature(layer='conv4', up_scale=4):
     print('COMPILING...')
     t = time()
@@ -28,23 +31,26 @@ def def_feature(layer='conv4', up_scale=4):
     print('%.2f seconds to compile _feature function' % (time() - t))
     return _ftr
 
-
+# 定义一种优化方法进行优化
 def def_bfgs(model_G, layer='conv4', npx=64, alpha=0.002):
     print('COMPILING...')
     t = time()
 
+    # 符号化定义
     x_f = T.tensor4()
     x = T.tensor4()
-    z = T.matrix()
+    z = T.matrix() # 随机种子
     tanh = activations.Tanh()
-    gx = model_G(tanh(z))
+    gx = model_G(tanh(z)) # 生成的图像
 
     if layer is 'hog':
         gx_f = HOGNet.get_hog(gx, use_bin=True, BS=4)
     else:
+        # 调整图像格式
         gx_t = AlexNet.transform_im(gx)
         gx_net = AlexNet.build_model(gx_t, layer=layer, shape=(None, 3, npx, npx))
         AlexNet.load_model(gx_net, layer=layer)
+        # AlexNet截止在layer的输出
         gx_f = lasagne.layers.get_output(gx_net[layer], deterministic=True)
 
     f_rec = T.mean(T.sqr(x_f - gx_f), axis=(1, 2, 3)) * sharedX(alpha)

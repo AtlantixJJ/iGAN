@@ -1,3 +1,8 @@
+#coding:utf-8
+"""
+利用基本运算合成NN中的操作
+其他封装库也是基于此
+"""
 import theano
 import theano.tensor as T
 from lib.theano_utils import floatX, sharedX

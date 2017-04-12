@@ -1,3 +1,4 @@
+#coding:utf-8
 from __future__ import print_function
 from time import time
 from lib.rng import np_rng
@@ -212,6 +213,7 @@ class Constrained_OPT(QThread):
 
     def update_invert(self, constraints):
         constraints_c = self.combine_constraints(constraints)
+        # 更新一次z
         gx_t, z_t, cost_all = self.opt_solver.invert(constraints_c, self.z_const)
 
         order = np.argsort(cost_all)
@@ -247,10 +249,14 @@ class Constrained_OPT(QThread):
         img_seq = []
         z_seq = []
 
+        # 在前一个z与现在的z中线性插值，展示形态变化
         for n in range(n_steps):
             ratio = n / float(n_steps- 1)
+            # 插值
             z_t = utils.interp_z(z1, z2, ratio, interp=interp)
+            # 生成
             seq = self.opt_solver.gen_samples(z0=z_t)
+
             img_seq.append(seq[:, np.newaxis, ...])
             z_seq.append(z_t[:,np.newaxis,...])
         self.img_seq = np.concatenate(img_seq, axis=1)

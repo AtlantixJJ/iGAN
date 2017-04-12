@@ -97,19 +97,13 @@ def get_params(model_file, n_layers, n_f, nz=100, nc=3):
     print('load model from %s' % model_file)
     set_model(disc_params, model['disc_params'])
     set_model(gen_params, model['gen_params'])
-
-    if 'predict_params' in model:
-        set_model(predict_params, model['predict_params'])
+    set_model(predict_params, model['predict_params'])
     disc_batchnorm = model['disc_batchnorm']
     gen_batchnorm = model['gen_batchnorm']
-    if 'predict_batchnorm' in model:
-        predict_batchnorm = model['predict_batchnorm']
-        predict_batchnorm = [sharedX(d) for d in predict_batchnorm]
-    else:
-        predict_batchnorm = None
+    predict_batchnorm = model['predict_batchnorm']
     disc_batchnorm = [sharedX(d) for d in disc_batchnorm]
     gen_batchnorm = [sharedX(d) for d in gen_batchnorm]
-
+    predict_batchnorm = [sharedX(d) for d in predict_batchnorm]
     print('%.2f seconds to load theano models' % (time() - t))
     return disc_params, gen_params, predict_params, disc_batchnorm, gen_batchnorm, predict_batchnorm
 
@@ -212,11 +206,15 @@ def disc_test(_x, _params, _batchnorm, n_layers=3):
 def gen_test(_z, _params, _batchnorm, n_layers=3, n_f=128, init_sz=4, nc=3, use_tanh=False):
     if use_tanh:
         _z= tanh(_z)
+    # gw0 : weight of dense layer(0)
+    # gg0 , gb0 : params of batchnorm layer
     [gw0, gg0, gb0] = _params[0:3]
     hs = []
     u = _batchnorm[0]
     s = _batchnorm[n_layers + 1]
+    # Clip z => Dense => BatchNorm => ReLU
     h0 = relu(batchnorm(T.dot(T.clip(_z, -1.0, 1.0), gw0), u=u, s=s, g=gg0, b=gb0))
+    # reshape to 4D
     h1 = h0.reshape((h0.shape[0], n_f * 2 ** n_layers, init_sz, init_sz))
     hs.extend([h0, h1])
     for n in range(n_layers):

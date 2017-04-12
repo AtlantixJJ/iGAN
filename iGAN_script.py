@@ -65,3 +65,4 @@ if __name__ == '__main__':
     final_vis = cv2.resize(final_vis, (0, 0), fx=2.0, fy=2.0)
     # save
     cv2.imwrite(args.output_result, final_vis)
+

@@ -1,3 +1,4 @@
+#coding:utf-8
 from __future__ import print_function
 import sys
 sys.path.append('..')
@@ -72,7 +73,9 @@ train_dcgan_utils.save_image(grid_real, os.path.join(sample_dir, 'real_samples.p
 
 
 # define DCGAN model
+# discriminate model
 disc_params = train_dcgan_utils.init_disc_params(n_f=n_f, n_layers=n_layers, nc=nc)
+# generative model
 gen_params = train_dcgan_utils.init_gen_params(nz=nz, n_f=n_f, n_layers=n_layers, nc=nc)
 x = T.tensor4()
 z = T.matrix()
@@ -81,6 +84,7 @@ gx = train_dcgan_utils.gen(z, gen_params, n_layers=n_layers, n_f=n_f, nc=nc)
 p_real = train_dcgan_utils.discrim(x, disc_params, n_layers=n_layers)
 p_gen = train_dcgan_utils.discrim(gx, disc_params, n_layers=n_layers)
 
+# binary cross entropy
 d_cost_real = costs.bce(p_real, T.ones(p_real.shape))
 d_cost_gen = costs.bce(p_gen, T.zeros(p_gen.shape))
 g_cost_d = costs.bce(p_gen, T.ones(p_gen.shape))
@@ -90,17 +94,24 @@ g_cost = g_cost_d
 
 cost = [g_cost, d_cost, g_cost_d, d_cost_real, d_cost_gen]
 
+# 学习率：default:0.0002
 lrt = sharedX(args.lr)
+# 声明优化方法类
 d_updater = updates.Adam(lr=lrt, b1=args.b1, regularizer=updates.Regularizer(l2=args.weight_decay))
 g_updater = updates.Adam(lr=lrt, b1=args.b1, regularizer=updates.Regularizer(l2=args.weight_decay))
+
 d_updates = d_updater(disc_params, d_cost)
 g_updates = g_updater(gen_params, g_cost)
+# 得到更新列表（每一项都是表达式）
 updates = d_updates + g_updates
 
 print('COMPILING')
 t = time()
+# output all costs, update generative network
 _train_g = theano.function([x, z], cost, updates=g_updates)
+# output all costs, update discriminate network
 _train_d = theano.function([x, z], cost, updates=d_updates)
+# generative prediction function
 _gen = theano.function([z], gx)
 print('%.2f seconds to compile theano functions' % (time() - t))
 
@@ -118,13 +129,14 @@ n_examples = 0
 t = time()
 
 for epoch in range(niter+niter_decay):
+    # tqdm : 进度条
     for imb, in tqdm(tr_stream.get_epoch_iterator(), total=ntrain / args.batch_size):
         imb = train_dcgan_utils.transform(imb, nc=nc)
         zmb = floatX(np_rng.uniform(-1., 1., size=(len(imb), nz)))
         if n_updates % args.update_k == 0:
-            cost = _train_g(imb, zmb)
+            cost = _train_g(imb, zmb) # 运行并更新网络
         else:
-            cost = _train_d(imb, zmb)
+            cost = _train_d(imb, zmb) # 运行并更新网络
         n_updates += 1
         n_examples += len(imb)
 
@@ -141,6 +153,7 @@ for epoch in range(niter+niter_decay):
     # generate samples and write webpage
     samples = np.asarray(_gen(sample_zmb))
     samples_t = train_dcgan_utils.inverse_transform(samples, npx=npx, nc=nc)
+    # 将所有图片和在一张大图上
     grid_vis = utils.grid_vis(samples_t, n_grid, n_grid)
     grid_vis_i = (grid_vis*255.0).astype(np.uint8)
     train_dcgan_utils.save_image(grid_vis_i, os.path.join(sample_dir, 'gen_%5.5d.png'%n_epochs))

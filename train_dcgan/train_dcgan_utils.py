@@ -13,7 +13,6 @@ from lib.rng import np_rng
 import numpy as np
 
 
-
 relu = activations.Rectify()
 sigmoid = activations.Sigmoid()
 lrelu = activations.LeakyRectify()
@@ -66,6 +65,7 @@ def gen(_z, _params, n_layers=3, n_f=128, init_sz=4, nc=3):
     if nc == 1:
         x_f = sigmoid(x)
     return x_f
+
 
 
 def discrim(_x, _params, n_layers=3):

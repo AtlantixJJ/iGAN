@@ -58,6 +58,10 @@ else:
             if id % 1000 == 0:
                 print('read %d/%d image' % (id, nImgs))
             img = cv2.imread(os.path.join(args.dataset_dir, file), cv2.IMREAD_COLOR)
+            if img == None:
+                print("Read failed")
+                print(os.path.join(args.dataset_dir, file))
+                continue
             try:
                 img = cv2.resize(img, dsize=(width, width), interpolation=cv2.INTER_CUBIC)
             except:

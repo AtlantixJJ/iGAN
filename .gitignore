@@ -11,6 +11,7 @@ cache/
 *.mp4
 *.dcgan_theano
 *.pkl
+*.zip
 .idea/
 web/
 

@@ -1,0 +1,1 @@
+ffmpeg -r $1 -i $2/%05d.png $3

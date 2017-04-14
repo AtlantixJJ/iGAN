@@ -46,6 +46,7 @@ if not args.data_file:
 npx, n_layers, n_f, nc, nz, niter, niter_decay = getattr(train_dcgan_config, args.model_name)()
 expr_name = args.model_name + args.ext
 
+# use default : find model in cache dir in the corresponding experiment name
 if not args.cache_dir:
     args.cache_dir = './cache/%s/' % expr_name
 
@@ -165,6 +166,7 @@ for epoch in range(niter + niter_decay):
     for xmb, in tr_stream.get_epoch_iterator():
         imb = train_dcgan_utils.transform(xmb, nc=nc)
         n += 1
+        print(imb.shape)
         train_cost = _train_p(imb)
         print('epoch = %3.3d, n = %3.3d/%3.3d, train_cost = %4.4f' % (epoch, n, total_n, train_cost)),
         n_updates += 1

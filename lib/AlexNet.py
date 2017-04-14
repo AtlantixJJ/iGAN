@@ -146,6 +146,9 @@ def transform_im(x, npx=64, nc=3):
     mean_channel = np.load(os.path.join(pkg_dir, 'ilsvrc_2012_mean.npy')).mean(1).mean(1)
     mean_im = mean_channel[np.newaxis,:,np.newaxis,np.newaxis]
     mean_im = floatX(np.tile(mean_im, [1,1, npx, npx]))
+    
+    #print(mean_im.shape)
     x2 = x1[:, [2,1,0], :,:]
+    #print(x2.shape)
     y = x2 - mean_im
     return y

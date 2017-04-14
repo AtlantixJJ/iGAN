@@ -103,6 +103,8 @@ def init_gen_params(nz=100, n_f=128, n_layers=3, init_sz=4, fs=5, nc=3):
     print('n_layers=', n_layers)
     gen_params = []
     outputf = n_f * 2 ** n_layers * init_sz * init_sz
+    print("Gen Weights.")
+    print("MM %d -> %d" % (nz,outputf))
     gw0 = gifn((nz, outputf), 'gw0')
     gg0 = gain_ifn((outputf), 'gg0')
     gb0 = bias_ifn((outputf), 'gb0')
@@ -110,10 +112,12 @@ def init_gen_params(nz=100, n_f=128, n_layers=3, init_sz=4, fs=5, nc=3):
     for n in range(0, n_layers):
         inputf = n_f * 2 ** (n_layers - n)
         outputf = n_f * 2 ** (n_layers - n - 1)
+        print("Fr %d to %d Channel" % (inputf, outputf) )
         gw = gifn((inputf, outputf, fs, fs), 'gw%d' % (n + 1))
         gg = gain_ifn((outputf), 'gg%d' % (n + 1))
         gb = bias_ifn((outputf), 'gb%d' % (n + 1))
         gen_params.extend([gw, gg, gb])
+    print("Fr %d to %d" % (n_f, nc))
     gwx = gifn((n_f, nc, fs, fs), 'gwx')
     gen_params.append(gwx)
     return gen_params

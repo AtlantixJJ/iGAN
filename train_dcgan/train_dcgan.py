@@ -127,7 +127,7 @@ n_updates = 0
 n_epochs = 0
 n_examples = 0
 t = time()
-
+print("Epoch : %d" % (niter+niter_decay))
 for epoch in range(niter+niter_decay):
     # tqdm : 进度条
     for imb, in tqdm(tr_stream.get_epoch_iterator(), total=ntrain / args.batch_size):

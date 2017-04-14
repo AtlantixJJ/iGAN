@@ -58,7 +58,11 @@ else:
             if id % 1000 == 0:
                 print('read %d/%d image' % (id, nImgs))
             img = cv2.imread(os.path.join(args.dataset_dir, file), cv2.IMREAD_COLOR)
-            img = cv2.resize(img, dsize=(width, width), interpolation=cv2.INTER_CUBIC)
+            try:
+                img = cv2.resize(img, dsize=(width, width), interpolation=cv2.INTER_CUBIC)
+            except:
+                print("skip~")
+                print(img.shape)
             img = ProcessImage(img, args.channel)
             imgs.append(img)
         nImgs = len(imgs)

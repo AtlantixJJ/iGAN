@@ -8,6 +8,16 @@ def AnimateEMDframes64():
     niter_decay = 125  # of iter to linearly decay learning rate to zero
     return npx, n_layers, n_f, nc, nz, niter, niter_decay
 
+def AnimateFaces():
+    n_layers = 3 # number of layers
+    n_f = 256  # number of feature channels
+    npx = 64  # height = width
+    nc = 3  # number of image channels
+    nz = 256  # # of dim for Z
+    niter = 15  # # of iter at starting learning rate
+    niter_decay = 25  # of iter to linearly decay learning rate to zero
+    return npx, n_layers, n_f, nc, nz, niter, niter_decay
+
 def AnimateEMDframes128():
     n_layers = 4 # number of layers
     n_f = 64  # number of feature channels

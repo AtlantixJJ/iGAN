@@ -21,7 +21,7 @@ class OPT_Solver():
 
         BS = 4 if self.nc == 1 else 8 # [hack]
         self.hog = HOGNet.HOGNet(use_bin=True, NO=8, BS=BS, nc=self.nc)
-        self.opt_model = self.def_invert(model, batch_size=batch_size, d_weight=d_weight, nc=self.nc)
+        self.opt_model = self.def_invert(model, batch_size=batch_size, d_weight=d_weight, nc=self.nc, nz = self.nz)
         self.batch_size = batch_size
 
     def get_image_size(self):

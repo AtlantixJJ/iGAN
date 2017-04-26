@@ -98,7 +98,7 @@ print('second pass: computing variance')
 tr_stream.reset()
 nb_var_sum = []
 n = 0
-
+print(num_batches)
 for imb, in tqdm(tr_stream.get_epoch_iterator(), total=ntrain / batch_size):
     imb = train_dcgan_utils.transform(imb, nc=nc)
     bn_data = _estimate_batchnorm(imb)

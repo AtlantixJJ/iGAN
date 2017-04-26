@@ -9,9 +9,9 @@ from PyQt4.QtCore import *
 import cv2
 
 class Constrained_OPT(QThread):
-    def __init__(self, opt_solver, batch_size=32, n_iters=25, topK=16, morph_steps=16, interp='linear'):
+    def __init__(self, opt_solver, batch_size=32, n_iters=25, topK=16, morph_steps=16, interp='linear', nz = 100):
         QThread.__init__(self)
-        self.nz = 100
+        self.nz = nz
         self.opt_solver = opt_solver
         self.topK = topK
         self.max_iters = n_iters

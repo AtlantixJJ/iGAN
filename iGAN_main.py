@@ -23,6 +23,7 @@ def parse_args():
     parser.add_argument('--interp', dest='interp', help='the interpolation method (linear or slerp)', type=str, default='linear')
     parser.add_argument('--average', dest='average', help='averageExplorer mode',action="store_true", default=False)
     parser.add_argument('--shadow', dest='shadow', help='shadowDraw mode', action="store_true", default=False)
+    
     args = parser.parse_args()
     return args
 
@@ -38,12 +39,12 @@ if __name__ == '__main__':
 
     # initialize model and constrained optimization problem
     model_class = locate('model_def.%s' % args.model_type)
-    model = model_class.Model(model_name=args.model_name, model_file=args.model_file)
+    model = model_class.Model(model_name=args.model_name, model_file=args.model_file, nz = 256)
     opt_class = locate('constrained_opt_%s' % args.framework)
     opt_solver = opt_class.OPT_Solver(model, batch_size=args.batch_size, d_weight=args.d_weight)
     img_size = opt_solver.get_image_size()
     opt_engine = constrained_opt.Constrained_OPT(opt_solver, batch_size=args.batch_size, n_iters=args.n_iters, topK=args.top_k,
-                                                 morph_steps=args.morph_steps, interp=args.interp)
+                                                 morph_steps=args.morph_steps, interp=args.interp, nz = 256)
 
     # initialize application
     app = QApplication(sys.argv)

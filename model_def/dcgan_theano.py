@@ -15,10 +15,10 @@ from . import dcgan_theano_config
 
 
 class Model(object):
-    def __init__(self, model_name, model_file, use_predict=False):
+    def __init__(self, model_name, model_file, use_predict=False ,nz = 100):
         self.model_name = model_name
         self.model_file = model_file
-        self.nz = 100 # [hack] hard-coded
+        self.nz = nz # [hack] hard-coded
         self.npx, self.n_layers, self.n_f, self.nc = getattr(dcgan_theano_config, model_name)()
         self.disc_params, self.gen_params, self.predict_params, \
             self.disc_batchnorm, self.gen_batchnorm, self.predict_batchnorm \

@@ -1,4 +1,4 @@
-def AnimateEMDframes64():
+def AnimateEMDFrames64():
     n_layers = 3 # number of layers
     n_f = 128  # number of feature channels
     npx = 64  # height = width
@@ -7,6 +7,9 @@ def AnimateEMDframes64():
     niter = 75  # # of iter at starting learning rate
     niter_decay = 125  # of iter to linearly decay learning rate to zero
     return npx, n_layers, n_f, nc
+
+def AnimateBigData64():
+    return AnimateEMDFrames64()
 
 def AnimateFaces():
     n_layers = 3 # number of layers
@@ -19,7 +22,7 @@ def AnimateFaces():
     return npx, n_layers, n_f, nc
 
 
-def AnimateEMDframes128():
+def AnimateEMDFrames128():
     n_layers = 4 # number of layers
     n_f = 64  # number of feature channels
     npx = 128  # height = width

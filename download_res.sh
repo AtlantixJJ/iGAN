@@ -1,0 +1,1 @@
+scp atlantix@166.111.17.46:iGAN/res/* ./res/

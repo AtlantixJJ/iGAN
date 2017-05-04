@@ -17,6 +17,7 @@ from lib import costs
 import train_dcgan_utils
 from lib.theano_utils import floatX, sharedX
 import load
+from model_def import dcgan_theano
 from lib import image_save
 import argparse
 
@@ -27,7 +28,7 @@ parser.add_argument('--ext', dest='ext', help='experiment name=model_name+ext', 
 parser.add_argument('--data_file', dest='data_file', help='the file that stores the hdf5 data', type=str, default=None)
 parser.add_argument('--cache_dir', dest='cache_dir', help='cache directory that stores models, samples and webpages', type=str, default=None)
 parser.add_argument('--batch_size', dest='batch_size', help='the number of examples in each batch', type=int, default=128)
-
+parser.add_argument("--reload",type=int,default=0)
 parser.add_argument('--update_k', dest='update_k', help='the number of discrim updates for each gen update', type=int, default=2)
 parser.add_argument('--save_freq', dest='save_freq', help='save a model every save_freq epochs', type=int, default=1)
 parser.add_argument('--lr', dest='lr', help='learning rate', type=float, default=0.0002)
@@ -77,6 +78,15 @@ train_dcgan_utils.save_image(grid_real, os.path.join(sample_dir, 'real_samples.p
 disc_params = train_dcgan_utils.init_disc_params(n_f=n_f, n_layers=n_layers, nc=nc)
 # generative model
 gen_params = train_dcgan_utils.init_gen_params(nz=nz, n_f=n_f, n_layers=n_layers, nc=nc)
+
+if args.reload != 0:
+    # load from cache
+    print("Reload...")
+    reload_gen = utils.PickleLoad(model_dir+"/gen_params")
+    dcgan_theano.set_model(gen_params, reload_gen)
+    reload_disc = utils.PickleLoad(model_dir+"/disc_params")
+    dcgan_theano.set_model(disc_params, reload_disc)
+
 x = T.tensor4()
 z = T.matrix()
 

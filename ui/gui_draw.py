@@ -55,7 +55,7 @@ class GUIDraw(QWidget):
             [im_c, mask_c] = self.uiWarp.get_constraints()
             [im_e, mask_e] = self.uiWarp.get_edge_constraints()
 
-        self.opt_engine.set_constraints([im_c, mask_c, im_e, mask_e])
+        self.opt_engine.add_constraints([im_c, mask_c, im_e, mask_e])
         self.opt_engine.update()
         self.frame_id = -1
 

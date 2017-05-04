@@ -7,6 +7,7 @@ import sys
 from lib import utils
 from PyQt4.QtCore import *
 import cv2
+import matplotlib.pyplot as plt
 
 class Constrained_OPT(QThread):
     def __init__(self, opt_solver, batch_size=32, n_iters=25, topK=16, morph_steps=16, interp='linear', nz = 100):
@@ -132,7 +133,27 @@ class Constrained_OPT(QThread):
 
     def set_constraints(self, constraints):
         self.constraints = constraints
+    
+    def add_constraints(self, constraints):
+        # 0 and 1 is for image, need to use accumulative mod
+        print(img)
+        print(mask)
+        img,mask = constraints[0:2]
+        self.constraints[0][mask>0] = img[mask>0]
 
+        self.constraints[1] += mask
+        self.constraints[1][self.constraints[1]>1] = 1
+
+        self.constraints[2:] = constraints[2:]
+        print(img)
+        print(mask)
+        """
+        plt.imshow(self.constraints[0])
+        plt.show()
+        plt.imshow(self.constraints[1])
+        plt.show()
+        """
+    
     def get_z(self, image_id, frame_id):
         if self.z_seq is not None:
             image_id = image_id % self.z_seq.shape[0]

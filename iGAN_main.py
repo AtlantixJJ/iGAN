@@ -6,7 +6,9 @@ from PyQt4.QtGui import QApplication, QIcon
 from PyQt4.QtCore import Qt
 from ui import gui_design
 from pydoc import locate
+import numpy as np
 import constrained_opt
+import cv2
 
 def parse_args():
     parser = argparse.ArgumentParser(description='iGAN: Interactive Visual Synthesis Powered by GAN')
@@ -23,9 +25,26 @@ def parse_args():
     parser.add_argument('--interp', dest='interp', help='the interpolation method (linear or slerp)', type=str, default='linear')
     parser.add_argument('--average', dest='average', help='averageExplorer mode',action="store_true", default=False)
     parser.add_argument('--shadow', dest='shadow', help='shadowDraw mode', action="store_true", default=False)
-    
+    parser.add_argument('--init_img', dest='init_img', default='None')
     args = parser.parse_args()
     return args
+
+def preprocess_image(img_path, npx):
+    im = cv2.imread(img_path, 1)
+    print(im.shape)
+    if im.shape[0] != npx or im.shape[1] != npx:
+        out = cv2.resize(im, (npx, npx))
+    else:
+        out = np.copy(im)
+
+    out = cv2.cvtColor(out, cv2.COLOR_BGR2RGB)
+    return out
+
+def img_as_input(img_path, npx):
+    # color, color_mask, image
+    # edge is to be modified
+    return preprocess_image(img_path, npx), cv2.cvtColor( np.ones((npx,npx,3),dtype='uint8'), cv2.COLOR_BGR2RGB), cv2.cvtColor(np.zeros((npx,npx,3),dtype='uint8'), cv2.COLOR_BGR2RGB)
+
 
 if __name__ == '__main__':
     args = parse_args()
@@ -45,7 +64,14 @@ if __name__ == '__main__':
     img_size = opt_solver.get_image_size()
     opt_engine = constrained_opt.Constrained_OPT(opt_solver, batch_size=args.batch_size, n_iters=args.n_iters, topK=args.top_k,
                                                  morph_steps=args.morph_steps, interp=args.interp, nz = 256)
-
+    if args.init_img != 'None':
+        npx = 64
+        im_color, im_color_mask, im_edge = img_as_input(args.init_img, npx)
+        # run the optimization
+        opt_engine.init_z()
+        constraints = [im_color, im_color_mask[... ,[0]], im_edge, im_edge[...,[0]]]
+        opt_engine.set_constraints(constraints=constraints)
+        opt_engine.update()
     # initialize application
     app = QApplication(sys.argv)
     window = gui_design.GUIDesign(opt_engine, win_size=args.win_size, img_size=img_size, topK=args.top_k,
